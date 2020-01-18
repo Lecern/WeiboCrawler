@@ -3,7 +3,7 @@ import scrapy
 from scrapy import Request
 from scrapy.utils.log import configure_logging
 
-from ..items import *
+from WeiboSearch.items import *
 import datetime
 import re
 import argparse
