@@ -1,15 +1,27 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapy import Request
+from scrapy.utils.log import configure_logging
+
 from ..items import *
 import datetime
 import re
 import argparse
-from settings import KEY_WORDS
+from WeiboSearch.settings import KEY_WORDS
 from datetime import timedelta
+import os
+import logging
 
 
-class WeiboSpiderSpider(scrapy.Spider):
+class WeiboSpider(scrapy.Spider):
+    configure_logging(install_root_handler=False)
+    log_path = './log/'
+    os.makedirs(log_path, exist_ok=True)
+    now_date = datetime.datetime.now().strftime('%y%m%d')
+    log_filename = log_path + "weibo_" + now_date + ".log"
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S",
+                        handlers=[logging.FileHandler(log_filename, encoding="utf-8")])
     name = 'weibo_spider'
     allowed_domains = ['weibo.cn']
     # start_urls = ['http://weibo.cn/']

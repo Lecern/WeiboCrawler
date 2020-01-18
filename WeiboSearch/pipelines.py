@@ -17,7 +17,7 @@ import datetime
 
 
 # items中加入时间戳
-class TimePipeline():
+class TimePipeline(object):
     def process_item(self, item, spider):
         if isinstance(item, TweetsItem) or isinstance(item, InformationItem):
             now = time.strftime('%Y-%m-%d %H:%M', time.localtime())
@@ -26,7 +26,7 @@ class TimePipeline():
 
 
 # 清洗时间
-class WeiboSpiderPipeline():
+class WeiboSpiderPipeline(object):
     def parse_time(self, date):
         if re.match('刚刚', date):
             date = time.strftime('%Y-%m-%d %H:%M', time.localtime(time.time()))

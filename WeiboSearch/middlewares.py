@@ -10,13 +10,14 @@ import json
 import logging
 import requests
 import random
+import os
 
 from WeiboSearch.settings import LOCAL_MONGO_PORT, LOCAL_MONGO_HOST, DB_NAME
 import pymongo
 
 
 # 代理ip
-class ProxyMiddleware():
+class ProxyMiddleware(object):
     def __init__(self, proxy_url):
         self.logger = logging.getLogger(__name__)
         self.proxy_url = proxy_url

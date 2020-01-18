@@ -8,6 +8,7 @@
 
 from scrapy import Item, Field
 
+
 class TweetsItem(Item):
     """ 微博信息 """
     collection = 'Tweets'
@@ -48,4 +49,3 @@ class InformationItem(Item):
     authentication = Field()  # 认证
     labels = Field()  # 标签
     crawled_at = Field()  # 抓取时间戳
-
