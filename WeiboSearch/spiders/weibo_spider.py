@@ -19,7 +19,8 @@ class WeiboSpider(scrapy.Spider):
     os.makedirs(log_path, exist_ok=True)
     now_date = datetime.datetime.now().strftime('%y%m%d')
     log_filename = log_path + "weibo_" + now_date + ".log"
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
+    logging.basicConfig(level=logging.DEBUG,
+                        format="%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s",
                         datefmt="%Y-%m-%d %H:%M:%S",
                         handlers=[logging.FileHandler(log_filename, encoding="utf-8")])
     name = 'weibo_spider'
@@ -127,7 +128,7 @@ class WeiboSpider(scrapy.Spider):
                                   )
                 else:
                     # 微博内容
-                    tweet_item['content'] = \
+                    tweet_item['text'] = \
                         ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
                                 ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
 
@@ -150,8 +151,8 @@ class WeiboSpider(scrapy.Spider):
     def parse_all_content(self, response):
         # 有阅读全文的情况，获取全文
         tweet_item = response.meta['item']
-        tweet_item['content'] = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
-                                        ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
+        tweet_item['text'] = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
+                                     ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
         if 'location' in tweet_item:
             tweet_item['location'] = \
                 response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
