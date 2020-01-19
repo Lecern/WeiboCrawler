@@ -131,9 +131,9 @@ class WeiboSpider(scrapy.Spider):
                         tweet_item['content'] = content_loc[0].replace(' ', '')
                         if len(content_loc) > 1:
                             loc = content_loc[1]
-                            if re.search(r"(http|https):\/\/t.cn", loc):
+                            if re.search(r"(http|https):\/\/", loc):
                                 yield Request(self.base_url + "/" + '/'.join(tweet_item['id'].split('_')),
-                                              callback=self.parse_all_content, meta={'item': tweet_item})
+                                              callback=self.parse_all_content, meta={'item': tweet_item}, priority=3)
                             else:
                                 tweet_item['location'] = loc
                     else:
