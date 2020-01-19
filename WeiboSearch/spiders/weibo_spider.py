@@ -27,13 +27,6 @@ class WeiboSpider(scrapy.Spider):
     allowed_domains = ['weibo.cn']
     # start_urls = ['http://weibo.cn/']
     base_url = "https://weibo.cn"
-    now_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    one_day_ago = (datetime.datetime.now() - timedelta(1)).strftime("%Y-%m-%d")
-    two_days_ago = (datetime.datetime.now() - timedelta(2)).strftime("%Y-%m-%d")
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--start", type=str, default=one_day_ago)
-    parser.add_argument("--end", type=str, default=now_date)
-    _args = parser.parse_args()
 
     def start_requests(self):
 
@@ -44,9 +37,13 @@ class WeiboSpider(scrapy.Spider):
         keyword = KEY_WORDS
 
         # 搜索的起始日期，自行修改   微博的创建日期是2009-08-16 也就是说不要采用这个日期更前面的日期了
-        date_start = datetime.datetime.strptime(self._args.start, '%Y-%m-%d')
+        # date_start = datetime.datetime.strptime(self._args.start, '%Y-%m-%d')
+        date_start = datetime.datetime.strptime(self.start, '%Y-%m-%d')
         # 搜索的结束日期，自行修改
-        date_end = datetime.datetime.strptime(self._args.end, '%Y-%m-%d')
+        date_end = datetime.datetime.strptime(self.end, '%Y-%m-%d')
+        # 只筛选原创
+        if self.ori:
+            url_format += '&hasori=1'
 
         time_spread = datetime.timedelta(days=1)
         while date_start < date_end:
@@ -128,12 +125,18 @@ class WeiboSpider(scrapy.Spider):
                                   )
                 else:
                     # 微博内容
-                    tweet_item['text'] = \
-                        ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
-                                ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
-
+                    text = ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
+                                   ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
                     if 'location' in tweet_item:
-                        tweet_item['location'] = tweet_node.xpath('.//span[@class="ctt"]/a[last()]/text()').extract()[0]
+                        content_loc = text.replace('显示地图', '').strip().rsplit(' ', 1)
+                        tweet_item['content'] = content_loc[0].replace(' ', '')
+                        if len(content_loc) > 1:
+                            tweet_item['location'] = content_loc[1]
+                    else:
+                        tweet_item['content'] = text.replace(' ', '')
+                    # if 'location' in tweet_item:
+                    #     loc = text.replace('显示地图', '').rsplit(' ', 1)
+                    #     tweet_item['location'] = loc
                     yield tweet_item
 
                 # 抓取该微博的用户信息
@@ -151,8 +154,8 @@ class WeiboSpider(scrapy.Spider):
     def parse_all_content(self, response):
         # 有阅读全文的情况，获取全文
         tweet_item = response.meta['item']
-        tweet_item['text'] = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
-                                     ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
+        tweet_item['content'] = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
+                                        ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
         if 'location' in tweet_item:
             tweet_item['location'] = \
                 response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
