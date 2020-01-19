@@ -127,6 +127,7 @@ class WeiboSpider(scrapy.Spider):
                     # 微博内容
                     text = ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
                                    ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
+                    text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
                     if 'location' in tweet_item:
                         content_loc = text.replace('显示地图', '').strip().rsplit(' ', 1)
                         tweet_item['content'] = content_loc[0].replace(' ', '')
@@ -137,6 +138,10 @@ class WeiboSpider(scrapy.Spider):
                     # if 'location' in tweet_item:
                     #     loc = text.replace('显示地图', '').rsplit(' ', 1)
                     #     tweet_item['location'] = loc
+                    name_content = tweet_item['content'].split(":", 1)
+                    if len(name_content) > 1:
+                        tweet_item['content'] = name_content[1]
+                        tweet_item['user_name'] = name_content[0]
                     yield tweet_item
 
                 # 抓取该微博的用户信息
@@ -154,8 +159,9 @@ class WeiboSpider(scrapy.Spider):
     def parse_all_content(self, response):
         # 有阅读全文的情况，获取全文
         tweet_item = response.meta['item']
-        tweet_item['content'] = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
+        text = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
                                         ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
+        tweet_item['content'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
         if 'location' in tweet_item:
             tweet_item['location'] = \
                 response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
