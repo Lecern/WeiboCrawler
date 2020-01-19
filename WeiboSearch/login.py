@@ -25,7 +25,7 @@ class WeiboLogin():
         # os.system('pkill -f phantom')
         self.url = 'https://passport.weibo.cn/signin/login?entry=mweibo&r=https://weibo.cn/'
         # self.browser = webdriver.PhantomJS()
-        self.browser = webdriver.Chrome(chrome_options=chrome_options)
+        self.browser = webdriver.Chrome(options=chrome_options)
         # self.browser.set_window_size(1050, 840)
         self.wait = WebDriverWait(self.browser, 20)
         self.username = username
