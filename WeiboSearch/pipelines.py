@@ -6,14 +6,15 @@
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
 
-import pymongo
-from pymongo.errors import DuplicateKeyError
-from WeiboSearch.items import *
-from WeiboSearch.settings import LOCAL_MONGO_HOST, LOCAL_MONGO_PORT, DB_NAME, WEIBO_COLLECTION, USER_COLLECTION
-
+import datetime
 import re
 import time
-import datetime
+
+import pymongo
+from pymongo.errors import DuplicateKeyError
+
+from WeiboSearch.items import *
+from WeiboSearch.settings import LOCAL_MONGO_HOST, LOCAL_MONGO_PORT, DB_NAME, WEIBO_COLLECTION, USER_COLLECTION
 
 
 # items中加入时间戳

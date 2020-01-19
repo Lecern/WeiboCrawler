@@ -8,12 +8,12 @@
 
 import json
 import logging
-import requests
 import random
-import os
+
+import pymongo
+import requests
 
 from WeiboSearch.settings import LOCAL_MONGO_PORT, LOCAL_MONGO_HOST, DB_NAME
-import pymongo
 
 
 # 代理ip

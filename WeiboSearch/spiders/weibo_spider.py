@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
+import datetime
+import logging
+import os
+import re
+
 import scrapy
 from scrapy import Request
 from scrapy.utils.log import configure_logging
 
 from WeiboSearch.items import *
-import datetime
-import re
-import argparse
 from WeiboSearch.settings import KEY_WORDS
-from datetime import timedelta
-import os
-import logging
 
 
 class WeiboSpider(scrapy.Spider):
@@ -42,7 +41,7 @@ class WeiboSpider(scrapy.Spider):
         # 搜索的结束日期，自行修改
         date_end = datetime.datetime.strptime(self.end, '%Y-%m-%d')
         # 只筛选原创
-        if self.ori:
+        if self.ori == 1:
             url_format += '&hasori=1'
 
         time_spread = datetime.timedelta(days=1)
@@ -121,8 +120,7 @@ class WeiboSpider(scrapy.Spider):
                 all_content_link = tweet_node.xpath('.//a[text()="全文" and contains(@href,"ckAll=1")]')
                 if all_content_link:
                     all_content_url = self.base_url + all_content_link.xpath('./@href').extract()[0]
-                    yield Request(all_content_url, callback=self.parse_all_content, meta={'item': tweet_item},
-                                  )
+                    yield Request(all_content_url, callback=self.parse_all_content, meta={'item': tweet_item})
                 else:
                     # 微博内容
                     text = ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
@@ -132,7 +130,12 @@ class WeiboSpider(scrapy.Spider):
                         content_loc = text.replace('显示地图', '').strip().rsplit(' ', 1)
                         tweet_item['content'] = content_loc[0].replace(' ', '')
                         if len(content_loc) > 1:
-                            tweet_item['location'] = content_loc[1]
+                            loc = content_loc[1]
+                            if re.search(r"(http|https):\/\/t.cn", loc):
+                                yield Request(self.base_url + "/" + '/'.join(tweet_item['id'].split('_')),
+                                              callback=self.parse_all_content, meta={'item': tweet_item})
+                            else:
+                                tweet_item['location'] = loc
                     else:
                         tweet_item['content'] = text.replace(' ', '')
                     # if 'location' in tweet_item:
@@ -160,11 +163,15 @@ class WeiboSpider(scrapy.Spider):
         # 有阅读全文的情况，获取全文
         tweet_item = response.meta['item']
         text = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
-                                        ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
+                       ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
         tweet_item['content'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
         if 'location' in tweet_item:
             tweet_item['location'] = \
                 response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
+        name_content = tweet_item['content'].split(":", 1)
+        if len(name_content) > 1:
+            tweet_item['content'] = name_content[1]
+            tweet_item['user_name'] = name_content[0]
         yield tweet_item
 
     def parse_information(self, response):
