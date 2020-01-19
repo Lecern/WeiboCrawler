@@ -11,7 +11,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 sys.path.append(os.getcwd())
 from settings import LOCAL_MONGO_HOST, LOCAL_MONGO_PORT, DB_NAME
-from webdriver_manager.chrome import ChromeDriverManager
 
 TEMPLATES_FOLDER = os.getcwd() + '/templates/'
 
@@ -21,7 +20,7 @@ class WeiboLogin():
         # os.system('pkill -f phantom')
         self.url = 'https://passport.weibo.cn/signin/login?entry=mweibo&r=https://weibo.cn/'
         # self.browser = webdriver.PhantomJS()
-        self.browser = webdriver.Chrome(ChromeDriverManager().install())
+        self.browser = webdriver.Chrome()
         # self.browser.set_window_size(1050, 840)
         self.wait = WebDriverWait(self.browser, 20)
         self.username = username
