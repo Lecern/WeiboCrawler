@@ -8,19 +8,24 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.options import Options
 
 sys.path.append(os.getcwd())
 from settings import LOCAL_MONGO_HOST, LOCAL_MONGO_PORT, DB_NAME
 
 TEMPLATES_FOLDER = os.getcwd() + '/templates/'
 
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
 
 class WeiboLogin():
     def __init__(self, username, password):
         # os.system('pkill -f phantom')
         self.url = 'https://passport.weibo.cn/signin/login?entry=mweibo&r=https://weibo.cn/'
         # self.browser = webdriver.PhantomJS()
-        self.browser = webdriver.Chrome()
+        self.browser = webdriver.Chrome(chrome_options=chrome_options)
         # self.browser.set_window_size(1050, 840)
         self.wait = WebDriverWait(self.browser, 20)
         self.username = username
