@@ -1,14 +1,15 @@
 import os
 import sys
 import time
+from datetime import datetime
 
 import pymongo
 from pymongo.errors import DuplicateKeyError
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.chrome.options import Options
 
 sys.path.append(os.getcwd())
 from settings import LOCAL_MONGO_HOST, LOCAL_MONGO_PORT, DB_NAME
@@ -19,6 +20,7 @@ chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
+
 
 class WeiboLogin():
     def __init__(self, username, password):
@@ -81,8 +83,11 @@ if __name__ == '__main__':
             continue
         print('获取cookie成功')
         print('Cookie:', cookie_str)
+        now_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
-            collection.insert(
-                {"_id": username, "password": password, "cookie": cookie_str, "status": "success"})
+            collection.insert_one(
+                {"_id": username, "password": password, "cookie": cookie_str, "status": "success",
+                 "created_at": now_date})
         except DuplicateKeyError as e:
-            collection.find_one_and_update({'_id': username}, {'$set': {'cookie': cookie_str, "status": "success"}})
+            collection.find_one_and_update({'_id': username}, {
+                '$set': {'cookie': cookie_str, "status": "success", "created_at": now_date}})
