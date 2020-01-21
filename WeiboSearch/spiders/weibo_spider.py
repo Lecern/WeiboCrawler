@@ -144,7 +144,10 @@ class WeiboSpider(scrapy.Spider):
                     name_content = tweet_item['text'].split(":", 1)
                     if len(name_content) > 1:
                         tweet_item['text'] = name_content[1]
-                        tweet_item['username'] = name_content[0]
+                        if re.search("转发", name_content[0]):
+                            tweet_item['username'] = name_content[0].split("转发")[0]
+                        else:
+                            tweet_item['username'] = name_content[0]
                     yield tweet_item
 
                 # 抓取该微博的用户信息
