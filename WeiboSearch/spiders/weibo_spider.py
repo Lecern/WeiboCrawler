@@ -144,7 +144,7 @@ class WeiboSpider(scrapy.Spider):
                     name_content = tweet_item['text'].split(":", 1)
                     if len(name_content) > 1:
                         tweet_item['text'] = name_content[1]
-                        tweet_item['user_name'] = name_content[0]
+                        tweet_item['username'] = name_content[0]
                     yield tweet_item
 
                 # 抓取该微博的用户信息
@@ -171,7 +171,7 @@ class WeiboSpider(scrapy.Spider):
         name_content = tweet_item['text'].split(":", 1)
         if len(name_content) > 1:
             tweet_item['text'] = name_content[1]
-            tweet_item['user_name'] = name_content[0]
+            tweet_item['username'] = name_content[0]
         yield tweet_item
 
     def parse_information(self, response):
