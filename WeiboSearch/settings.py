@@ -102,9 +102,9 @@ RETRY_HTTP_CODES = [401, 403, 408, 414, 500, 502, 503, 504]
 
 LOCAL_MONGO_HOST = '127.0.0.1'
 LOCAL_MONGO_PORT = 27017
-DB_NAME = 'weibo_pneumonia'
-WEIBO_COLLECTION = 'weibos'
-USER_COLLECTION = 'users'
+DB_NAME = 'wuhan_pneumonia'
+WEIBO_COLLECTION = 'weibo_zh'
+USER_COLLECTION = 'weibo_users'
 
 # ip代理 池
 PROXY_URL = 'http://127.0.0.1:5000/proxy/target/weibo/cn'

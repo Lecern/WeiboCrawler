@@ -79,7 +79,7 @@ class WeiboSpider(scrapy.Spider):
                     # 微博发表时间
                     tweet_item['created_at'] = create_time_info.split('来自')[0].strip()
                     # 发布微博的工具
-                    tweet_item['tool'] = create_time_info.split('来自')[1].strip()
+                    tweet_item['source'] = create_time_info.split('来自')[1].strip()
                 else:
                     tweet_item['created_at'] = create_time_info.strip()
 
@@ -128,7 +128,7 @@ class WeiboSpider(scrapy.Spider):
                     text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
                     if 'location' in tweet_item:
                         content_loc = text.replace('显示地图', '').strip().rsplit(' ', 1)
-                        tweet_item['content'] = content_loc[0].replace(' ', '')
+                        tweet_item['text'] = content_loc[0].replace(' ', '')
                         if len(content_loc) > 1:
                             loc = content_loc[1]
                             if re.search(r"(http|https):\/\/", loc):
@@ -137,13 +137,13 @@ class WeiboSpider(scrapy.Spider):
                             else:
                                 tweet_item['location'] = loc
                     else:
-                        tweet_item['content'] = text.replace(' ', '')
+                        tweet_item['text'] = text.replace(' ', '')
                     # if 'location' in tweet_item:
                     #     loc = text.replace('显示地图', '').rsplit(' ', 1)
                     #     tweet_item['location'] = loc
-                    name_content = tweet_item['content'].split(":", 1)
+                    name_content = tweet_item['text'].split(":", 1)
                     if len(name_content) > 1:
-                        tweet_item['content'] = name_content[1]
+                        tweet_item['text'] = name_content[1]
                         tweet_item['user_name'] = name_content[0]
                     yield tweet_item
 
@@ -164,13 +164,13 @@ class WeiboSpider(scrapy.Spider):
         tweet_item = response.meta['item']
         text = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
                        ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
-        tweet_item['content'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
+        tweet_item['text'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
         if 'location' in tweet_item:
             tweet_item['location'] = \
                 response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
-        name_content = tweet_item['content'].split(":", 1)
+        name_content = tweet_item['text'].split(":", 1)
         if len(name_content) > 1:
-            tweet_item['content'] = name_content[1]
+            tweet_item['text'] = name_content[1]
             tweet_item['user_name'] = name_content[0]
         yield tweet_item
 
