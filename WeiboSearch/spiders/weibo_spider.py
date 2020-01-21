@@ -69,10 +69,10 @@ class WeiboSpider(scrapy.Spider):
                                                                            user_tweet_id.group(1))
 
                 # 发表该微博用户id
-                tweet_item['user_id'] = user_tweet_id.group(2)
+                tweet_item['user'] = user_tweet_id.group(2)
 
                 # 微博id
-                tweet_item['id'] = '{}_{}'.format(user_tweet_id.group(2), user_tweet_id.group(1))
+                tweet_item['id_str'] = '{}_{}'.format(user_tweet_id.group(2), user_tweet_id.group(1))
 
                 create_time_info = ''.join(tweet_node.xpath('.//span[@class="ct"]').xpath('string(.)').extract())
                 if "来自" in create_time_info:
@@ -84,17 +84,17 @@ class WeiboSpider(scrapy.Spider):
                     tweet_item['created_at'] = create_time_info.strip()
 
                 # 点赞数
-                like_num = tweet_node.xpath('.//a[contains(text(),"赞[")]/text()').extract()[0]
-                tweet_item['like_num'] = int(re.search('\d+', like_num).group())
+                favorite_count = tweet_node.xpath('.//a[contains(text(),"赞[")]/text()').extract()[0]
+                tweet_item['favorite_count'] = int(re.search('\d+', favorite_count).group())
 
                 # 转发数
-                repost_num = tweet_node.xpath('.//a[contains(text(),"转发[")]/text()').extract()[0]
-                tweet_item['repost_num'] = int(re.search('\d+', repost_num).group())
+                retweet_count = tweet_node.xpath('.//a[contains(text(),"转发[")]/text()').extract()[0]
+                tweet_item['retweet_count'] = int(re.search('\d+', retweet_count).group())
 
                 # 评论数
-                comment_num = tweet_node.xpath(
+                reply_count = tweet_node.xpath(
                     './/a[contains(text(),"评论[") and not(contains(text(),"原文"))]/text()').extract()[0]
-                tweet_item['comment_num'] = int(re.search('\d+', comment_num).group())
+                tweet_item['reply_count'] = int(re.search('\d+', reply_count).group())
 
                 # 图片
                 images = tweet_node.xpath('.//img[@alt="图片"]/@src')
@@ -109,7 +109,7 @@ class WeiboSpider(scrapy.Spider):
                 # 定位信息
                 map_node = tweet_node.xpath('.//a[contains(text(),"显示地图")]')
                 if map_node:
-                    tweet_item['location'] = True
+                    tweet_item['place'] = True
 
                 # 原始微博，只有转发的微博才有这个字段
                 repost_node = tweet_node.xpath('.//a[contains(text(),"原文评论[")]/@href')
@@ -126,21 +126,21 @@ class WeiboSpider(scrapy.Spider):
                     text = ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
                                    ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
                     text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
-                    if 'location' in tweet_item:
+                    if 'place' in tweet_item:
                         content_loc = text.replace('显示地图', '').strip().rsplit(' ', 1)
                         tweet_item['text'] = content_loc[0].replace(' ', '')
                         if len(content_loc) > 1:
                             loc = content_loc[1]
                             if re.search(r"(http|https):\/\/", loc):
-                                yield Request(self.base_url + "/" + '/'.join(tweet_item['id'].split('_')),
+                                yield Request(self.base_url + "/" + '/'.join(tweet_item['id_str'].split('_')),
                                               callback=self.parse_all_content, meta={'item': tweet_item}, priority=3)
                             else:
-                                tweet_item['location'] = loc
+                                tweet_item['place'] = loc
                     else:
                         tweet_item['text'] = text.replace(' ', '')
-                    # if 'location' in tweet_item:
+                    # if 'place' in tweet_item:
                     #     loc = text.replace('显示地图', '').rsplit(' ', 1)
-                    #     tweet_item['location'] = loc
+                    #     tweet_item['place'] = loc
                     name_content = tweet_item['text'].split(":", 1)
                     if len(name_content) > 1:
                         tweet_item['text'] = name_content[1]
@@ -148,7 +148,7 @@ class WeiboSpider(scrapy.Spider):
                     yield tweet_item
 
                 # 抓取该微博的用户信息
-                yield Request(url="https://weibo.cn/{}/info".format(tweet_item['user_id']),
+                yield Request(url="https://weibo.cn/{}/info".format(tweet_item['user']),
                               callback=self.parse_information, priority=2)
 
             except Exception as e:
@@ -165,8 +165,8 @@ class WeiboSpider(scrapy.Spider):
         text = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
                        ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
         tweet_item['text'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
-        if 'location' in tweet_item:
-            tweet_item['location'] = \
+        if 'place' in tweet_item:
+            tweet_item['place'] = \
                 response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
         name_content = tweet_item['text'].split(":", 1)
         if len(name_content) > 1:

@@ -21,7 +21,7 @@ from WeiboSearch.settings import LOCAL_MONGO_HOST, LOCAL_MONGO_PORT, DB_NAME, WE
 class TimePipeline(object):
     def process_item(self, item, spider):
         if isinstance(item, TweetsItem) or isinstance(item, InformationItem):
-            now = time.strftime('%Y-%m-%d %H:%M', time.localtime())
+            now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
             item['crawled_at'] = now
         return item
 

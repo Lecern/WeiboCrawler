@@ -13,19 +13,19 @@ class TweetsItem(Item):
     """ 微博信息 """
     collection = 'Tweets'
 
-    id = Field()  # 微博id
+    id_str = Field()  # 微博id
     weibo_url = Field()  # 微博URL
     created_at = Field()  # 微博发表时间
-    like_num = Field()  # 点赞数
-    repost_num = Field()  # 转发数
-    comment_num = Field()  # 评论数
+    favorite_count = Field()  # 点赞数
+    retweet_count = Field()  # 转发数
+    reply_count = Field()  # 评论数
     text = Field()  # 微博内容
-    user_id = Field()  # 发表该微博用户的id
+    user = Field()  # 发表该微博用户的id
     username = Field()  # 用户昵称
     source = Field()  # 发布微博的工具
     image_url = Field()  # 图片
     video_url = Field()  # 视频
-    location = Field()  # 定位信息
+    place = Field()  # 定位信息
     origin_weibo = Field()  # 原始微博，只有转发的微博才有这个字段
     crawled_at = Field()  # 抓取时间戳
 
