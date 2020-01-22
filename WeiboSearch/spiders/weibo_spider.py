@@ -166,11 +166,22 @@ class WeiboSpider(scrapy.Spider):
         # 有阅读全文的情况，获取全文
         tweet_item = response.meta['item']
         text = ''.join(response.xpath('//*[@id="M_"]/div[1]').xpath('string(.)').extract()
-                       ).replace(u'\xa0', '').replace(u'\u3000', '').replace(' ', '').split('赞[', 1)[0]
-        tweet_item['text'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
+                       ).replace(u'\xa0', '').replace(u'\u3000', '')
+        # text = re.sub(r"(<img alt=[\'|\"]\[)(.*?)(\][\'|\"].*?>)", ":\\2:", text, 0, re.IGNORECASE | re.MULTILINE)
+        text = re.split(r'[0-9]{1,2}月[0-9]{1,2}日( )*[0-9]{1,2}:[0-9]{1,2} *关注[他|她] *举报', text)[0]
+        text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0).strip()
+        # tweet_item['text'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0).replace(' ', '')
         if 'place' in tweet_item:
-            tweet_item['place'] = \
-                response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
+            # tweet_item['place'] = \
+            #     response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
+            loc_text = text.rsplit(' ', 1)
+            if len(loc_text) > 1:
+                tweet_item['place'] = loc_text[1]
+                tweet_item['text'] = loc_text[0].replace(' ', '')
+            else:
+                tweet_item['text'] = loc_text[0].replace(' ', '')
+        else:
+            tweet_item['text'] = text.replace(' ', '')
         name_content = tweet_item['text'].split(":", 1)
         if len(name_content) > 1:
             tweet_item['text'] = name_content[1]

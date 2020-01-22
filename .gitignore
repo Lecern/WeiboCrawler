@@ -1,1 +1,15 @@
 # Created by .ignore support plugin (hsz.mobi)
+.idea/.gitignore
+.idea/WeiboCrawler.iml
+.idea/deployment.xml
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/mongoSettings.xml
+.idea/vcs.xml
+.idea/webServers.xml
+WeiboSearch/__pycache__/
+WeiboSearch/account_build/account.txt
+WeiboSearch/account_build/local_login.py
+WeiboSearch/log/
+WeiboSearch/spiders/__pycache__/
