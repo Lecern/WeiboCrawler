@@ -33,7 +33,10 @@ class WeiboSpider(scrapy.Spider):
 
         # 搜索的关键词，可以修改
 
-        keyword = KEY_WORDS
+        if hasattr(self, "keyword") and self.keyword:
+            keyword = self.keyword
+        else:
+            keyword = KEY_WORDS
 
         # 搜索的起始日期，自行修改   微博的创建日期是2009-08-16 也就是说不要采用这个日期更前面的日期了
         # date_start = datetime.datetime.strptime(self._args.start, '%Y-%m-%d')
