@@ -109,4 +109,4 @@ USER_COLLECTION = 'weibo_users'
 # ip代理 池
 PROXY_URL = 'http://127.0.0.1:5000/proxy/target/weibo/cn'
 
-KEY_WORDS = '我在长沙，离武汉只有高铁1小时的城市'
+KEY_WORDS = '武汉 肺炎'
