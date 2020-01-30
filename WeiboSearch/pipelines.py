@@ -85,4 +85,12 @@ class MongoPipeline(object):
             """
             说明有重复数据
             """
-            pass
+            collection.update_one({
+                'id_str': item['id_str']},
+                {'$set': {'place': item['place'], 'text': item['text'], 'weibo_url': item['weibo_url'],
+                 'user': item['user'], 'created_at': item['created_at'], 'source': item['source'],
+                 'favorite_count': item['favorite_count'], 'retweet_count': item['retweet_count'],
+                 'reply_count': item['reply_count'], 'image_url': item['image_url'], 'username': item['username'],
+                 'crawled_at': item['crawled_at']}}, upsert=True)
+            return
+            # pass
