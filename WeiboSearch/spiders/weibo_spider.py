@@ -44,7 +44,7 @@ class WeiboSpider(scrapy.Spider):
         # 搜索的结束日期，自行修改
         date_end = datetime.datetime.strptime(self.end, '%Y-%m-%d')
         # 只筛选原创
-        if self.ori == 1:
+        if self.ori == '1' or self.ori == 1:
             url_format += '&hasori=1'
 
         time_spread = datetime.timedelta(days=1)
@@ -52,7 +52,7 @@ class WeiboSpider(scrapy.Spider):
             next_time = date_start + time_spread
             url = url_format.format(keyword, date_start.strftime("%Y%m%d"), next_time.strftime("%Y%m%d"))
             date_start = next_time
-            yield Request(url, callback=self.parse_tweet, dont_filter=True)
+            yield Request(url, callback=self.parse_tweet, dont_filter=True, meta={"keyword": keyword})
 
     # 解析微博
     def parse_tweet(self, response):
@@ -60,6 +60,7 @@ class WeiboSpider(scrapy.Spider):
         解析本页的数据
         """
         tweet_nodes = response.xpath('//div[@class="c" and @id]')
+        keyword = response.meta['keyword']
         for tweet_node in tweet_nodes:
             try:
                 tweet_item = TweetsItem()
@@ -128,8 +129,8 @@ class WeiboSpider(scrapy.Spider):
                     # 微博内容
                     text = ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
                                    ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
-                    if re.search(r"转发了(.*?)的微博", text):
-                        text = ''.join(tweet_node.xpath('./div[2]').xpath('string(.)').extract()
+                    if re.search(r"转发了(.*?)的微博", text) and (not re.search(keyword, text)):
+                        text = ''.join(tweet_node.xpath('./div[last()]').xpath('string(.)').extract()
                                        ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
                     text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
                     text = re.sub(r"(?<= )[^ ]*?的微博视频", "", text, 0, re.UNICODE)
