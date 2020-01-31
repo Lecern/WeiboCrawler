@@ -52,7 +52,7 @@ class WeiboSpider(scrapy.Spider):
             next_time = date_start + time_spread
             url = url_format.format(keyword, date_start.strftime("%Y%m%d"), next_time.strftime("%Y%m%d"))
             date_start = next_time
-            yield Request(url, callback=self.parse_tweet, dont_filter=True, meta={"keyword": keyword})
+            yield Request(url, callback=self.parse_tweet, dont_filter=True)
 
     # 解析微博
     def parse_tweet(self, response):
@@ -60,7 +60,10 @@ class WeiboSpider(scrapy.Spider):
         解析本页的数据
         """
         tweet_nodes = response.xpath('//div[@class="c" and @id]')
-        keyword = response.meta['keyword']
+        if hasattr(self, "keyword") and self.keyword:
+            keyword = self.keyword
+        else:
+            keyword = KEY_WORDS
         for tweet_node in tweet_nodes:
             try:
                 tweet_item = TweetsItem()
