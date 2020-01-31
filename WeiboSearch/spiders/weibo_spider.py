@@ -128,6 +128,9 @@ class WeiboSpider(scrapy.Spider):
                     # 微博内容
                     text = ''.join(tweet_node.xpath('./div[1]').xpath('string(.)').extract()
                                    ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
+                    if re.search(r"转发了(.*?)的微博", text):
+                        text = ''.join(tweet_node.xpath('./div[2]').xpath('string(.)').extract()
+                                       ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
                     text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
                     text = re.sub(r"(?<= )[^ ]*?的微博视频", "", text, 0, re.UNICODE)
                     if 'place' in tweet_item:
