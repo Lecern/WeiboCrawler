@@ -136,7 +136,9 @@ class WeiboSpider(scrapy.Spider):
                         text = ''.join(tweet_node.xpath('./div[last()]').xpath('string(.)').extract()
                                        ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
                     text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
-                    text = re.sub(r"((?<= )|(.+)#.*)[^ ]*?的微博视频", "\\2", text, 1)
+                    if re.search(r"的微博视频", text):
+                        # text = re.sub(r"((?<= )|(.+)#.*)[^ ]*?的微博视频", "\\2", text, 1)
+                        text = re.sub(r"(.*\W).+", "\\1", text, 1)
                     if 'place' in tweet_item:
                         content_loc = text.replace('显示地图', '').strip().rsplit(' ', 1)
                         tweet_item['text'] = content_loc[0].replace(' ', '')
