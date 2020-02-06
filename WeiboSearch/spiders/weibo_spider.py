@@ -183,11 +183,14 @@ class WeiboSpider(scrapy.Spider):
         # text = re.sub(r"(<img alt=[\'|\"]\[)(.*?)(\][\'|\"].*?>)", ":\\2:", text, 0, re.IGNORECASE | re.MULTILINE)
         text = re.split(r'[0-9]{1,2}月[0-9]{1,2}日( )*[0-9]{1,2}:[0-9]{1,2} *关注[他|她] *举报', text)[0]
         text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0).strip()
+        if re.search(r"的微博视频", text):
+            # text = re.sub(r"((?<= )|(.+)#.*)[^ ]*?的微博视频", "\\2", text, 1)
+            text = re.sub(r"(.*)([ #@.,\-_|=+!。，])(.+的微博视频)(.*)", "\\1\\2\\4", text, 1)
         # tweet_item['text'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0).replace(' ', '')
         if 'place' in tweet_item:
             # tweet_item['place'] = \
             #     response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
-            loc_text = text.rsplit(' ', 1)
+            loc_text = text.strip().rsplit(' ', 1)
             if len(loc_text) > 1:
                 tweet_item['place'] = loc_text[1]
                 tweet_item['text'] = loc_text[0].replace(' ', '')
