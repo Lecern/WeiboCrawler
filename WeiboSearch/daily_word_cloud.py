@@ -89,8 +89,8 @@ def main():
 
     # previous_2_days = (datetime.strptime(date, "%Y-%m-%d") - timedelta(days=2)).strftime("%Y-%m-%d")
     lang = "weibo_zh"
-    start = (datetime.strptime(arg.date, "%Y-%m-%d") - timedelta(days=2)).strftime("%Y-%m-%d")
-    end = (datetime.strptime(arg.date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    start = (datetime.strptime(arg.date, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    end = arg.date
 
     client = pymongo.MongoClient()
     database = client['wuhan_pneumonia']
