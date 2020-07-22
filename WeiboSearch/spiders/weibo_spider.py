@@ -109,9 +109,9 @@ class WeiboSpider(scrapy.Spider):
                     tweet_item['image_url'] = images.extract()[0]
 
                 # 视频
-                videos = tweet_node.xpath('.//a[contains(@href,"https://m.weibo.cn/s/video/show?object_id=")]/@href')
-                if videos:
-                    tweet_item['video_url'] = videos.extract()[0]
+                videos = tweet_node.xpath('.//a[contains(text(), "http://t.cn/")]/@href')
+                # if videos:
+                #     tweet_item['video_url'] = videos.extract()[0]
 
                 # 定位信息
                 map_node = tweet_node.xpath('.//a[contains(text(),"显示地图")]')
@@ -136,9 +136,9 @@ class WeiboSpider(scrapy.Spider):
                         text = ''.join(tweet_node.xpath('./div[last()]').xpath('string(.)').extract()
                                        ).replace(u'\xa0', '').replace(u'\u3000', '').split('赞[', 1)[0]
                     text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0)
-                    if re.search(r"的微博视频", text):
+                    if re.search(r"的(微博|秒拍)视频", text):
                         # text = re.sub(r"((?<= )|(.+)#.*)[^ ]*?的微博视频", "\\2", text, 1)
-                        text = re.sub(r"(.*)([ #@.,\\|=+!。，])(.+的微博视频)(.*)", "\\1\\2\\4", text, 1)
+                        text = re.sub(r"(.*)([ #@.,\\|=+!。，])(.+的(微博|秒拍)视频)(.*)", "\\1\\2\\5", text, 1)
                     if 'place' in tweet_item:
                         content_loc = text.replace('显示地图', '').strip().rsplit(' ', 1)
                         tweet_item['text'] = content_loc[0].replace(' ', '')
@@ -149,6 +149,9 @@ class WeiboSpider(scrapy.Spider):
                                               callback=self.parse_all_content, meta={'item': tweet_item}, priority=3)
                             else:
                                 tweet_item['place'] = loc
+                    elif videos:
+                        yield Request(self.base_url + "/" + '/'.join(tweet_item['id_str'].split('_')),
+                                      callback=self.parse_all_content, meta={'item': tweet_item}, priority=3)
                     else:
                         tweet_item['text'] = text.replace(' ', '')
                     # if 'place' in tweet_item:
@@ -182,17 +185,22 @@ class WeiboSpider(scrapy.Spider):
                        ).replace(u'\xa0', '').replace(u'\u3000', '')
         # text = re.sub(r"(<img alt=[\'|\"]\[)(.*?)(\][\'|\"].*?>)", ":\\2:", text, 0, re.IGNORECASE | re.MULTILINE)
         text = re.split(r'[0-9]{1,2}月[0-9]{1,2}日( )*[0-9]{1,2}:[0-9]{1,2} *关注[他|她] *举报', text)[0]
+        text = re.split(r'[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} *关注[他|她] *举报', text)[0]
         text = re.sub(r"\[组图共[0-9]*张\]", "", text, 0).strip()
-        if re.search(r"的微博视频", text):
+        # 视频
+        videos = response.xpath('.//*[@id="M_"]/div[1]//span[@class="ctt"]//a[contains(text(), "视频")]/@href')
+        if videos:
+            tweet_item['video_url'] = videos.extract()[0]
+        if re.search(r"的(微博|秒拍)视频", text):
             # text = re.sub(r"((?<= )|(.+)#.*)[^ ]*?的微博视频", "\\2", text, 1)
-            text = re.sub(r"(.*)([ #@.,\-_|=+!。，])(.+的微博视频)(.*)", "\\1\\2\\4", text, 1)
+            text = re.sub(r"(.*)([ #@.,\-_|=+!。，])(.+的(微博|秒拍)视频)(.*)", "\\1\\2\\5", text, 1)
         # tweet_item['text'] = re.sub(r"\[组图共[0-9]*张\]", "", text, 0).replace(' ', '')
         if 'place' in tweet_item:
-            # tweet_item['place'] = \
-            #     response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
+            temp_place = response.xpath('//*[@id="M_"]/div[1]//span[@class="ctt"]/a[last()]/text()').extract()[0]
+            tweet_item['place'] = temp_place if not temp_place.find("视频") else ''
             loc_text = text.strip().rsplit(' ', 1)
             if len(loc_text) > 1:
-                tweet_item['place'] = loc_text[1]
+                # tweet_item['place'] = loc_text[1]
                 tweet_item['text'] = loc_text[0].replace(' ', '')
             else:
                 tweet_item['text'] = loc_text[0].replace(' ', '')
